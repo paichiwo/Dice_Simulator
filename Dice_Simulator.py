@@ -1,8 +1,9 @@
-# Dice simulator
+# Dice Simulator
 
-import random as rnd
+import json
+import requests
+import PySimpleGUI as sg
 
-# Dictionary with dice images
 dice_art_dict = {
 
     1: """
@@ -48,27 +49,66 @@ dice_art_dict = {
 -------
        """
 }
-# Variables to count average
+
+
+# Application layout as list
+layout = [
+    [sg.Text("DICE SIMULATOR, PRESS ROLL TO PLAY", justification="centre")],
+    [sg.Text(dice_art_dict[1],
+             font="Courier 20",
+             justification="centre",
+             pad=(80, 0),
+             key="-OUTPUT-")],
+    [sg.Button("ROLL", key="-ROLL-", expand_x=True)],
+    [sg.Text("ROLLED NUMBERS:")],
+    [sg.Text("", key="-ROLLED-")],
+    [sg.Text("AVERAGE:")],
+    [sg.Text("", key="-AVG-")]
+]  # rows
+
+window = sg.Window(f"Dice Simulator", layout)  # sg.Window(title,layout)
+
+dice_list = []
+dice_list_int = []
+output_msg = ""
 number_of_rolls = 0
-sum_of_rolled_numbers = 0
-rolled_numbers = []
 
-# Main loop
 while True:
-    # asking user to start rolling dice or quit
-    print('Press (p)lay roll a dice or (q)uit')
-    choice = input()
-
-    if choice == 'p':
-        number_of_rolls = number_of_rolls + 1
-        # dice roll
-        dice = rnd.randint(1, 6)
-        print(dice_art_dict[dice])
-        rolled_numbers.append(dice)
-    elif choice == 'w':
-        sum_of_rolled_numbers = sum(rolled_numbers)
-        print('Quitting')
-        print(f'Average of rolled numbers: {round(sum_of_rolled_numbers / number_of_rolls)}')
+    event, values = window.read()
+    if event == sg.WIN_CLOSED:
         break
-    elif choice != 'w' or choice != 'p':
-        print('You didn\'t press (p) or (q)')
+
+    if event == "-ROLL-":
+        # Roll the dice
+        url = 'https://api.random.org/json-rpc/1/invoke'
+        data = {'jsonrpc': '2.0',
+                'method': 'generateIntegers',
+                'params': {'apiKey': 'a25c68b0-8cda-4eee-a558-448642f4420d',
+                           'n': 1, 'min': 1, 'max': 6,
+                           'base': 10}, 'id': 1}
+        params = json.dumps(data)
+        response = requests.post(url, params)
+        dice = int(response.text[45])
+
+        # Count number of rolls
+        number_of_rolls += 1
+
+        # Print dice
+        output_msg = dice_art_dict[dice]
+
+        # Append result to list of strings and list of integers
+        dice_list.append(str(dice))
+        dice_list_int.append(dice)
+
+        # Count sum of list with integers
+        sum_of_rolls = sum(dice_list_int)
+
+        # Convert list to sequence of numbers
+        rolled_numbers = ", ".join(dice_list)
+
+        # Display results
+        window["-OUTPUT-"].update(output_msg)
+        window["-ROLLED-"].update(rolled_numbers)
+        window["-AVG-"].update(round(sum_of_rolls / number_of_rolls, 3))
+
+window.close()
