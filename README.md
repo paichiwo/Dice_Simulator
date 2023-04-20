@@ -44,7 +44,7 @@ The program then displays the corresponding image of the rolled number on the GU
 The program includes several variables that you can customize:
 
 *   **images folder**: Folder that contains all the images used in the program.
-*   **psg.theme**: The color theme of the GUI.  [(List of themes)](https://media.geeksforgeeks.org/wp-content/uploads/20200511200254/f19.jpg)
+*   **psg.theme**: The color theme of the GUI. [(List of themes)](https://media.geeksforgeeks.org/wp-content/uploads/20200511200254/f19.jpg)
 *   **font**: The font used in the GUI.
 
 You can modify these variables to change the appearance of the program.
